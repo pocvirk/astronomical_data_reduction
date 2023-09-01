@@ -3,7 +3,7 @@ repo for astronomical data reduction software, python notebooks to be used in M2
 
 Soft contains the software (mostly):
   - IMAGE:
-  - Generation of master frames bias and flat
+    --Generation of master frames bias and flat
   - reduction of observed image
   - re-alignment of observed images to a common reference frame for stacking
       
