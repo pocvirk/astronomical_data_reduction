@@ -80,6 +80,16 @@ def gaussian(x, *params):
         result += amp * np.exp(-(x - cen) ** 2 / (2 * wid ** 2))
     return result
 
+# Define the Gaussian function
+def gaussian_plus_bg(x, *params):
+    # just like the gaussian but with a constant background under ti
+    # should help fitting emission lines in objects
+    result= np.full(len(x),0.)
+    for i in range(0, len(params), 4):
+        amp, cen, wid , bg = params[i:i+4]
+        result += amp * np.exp(-(x - cen) ** 2 / (2 * wid ** 2)) + bg
+    return result
+
 def generate_first_guess(peaks):
 #    npeaks=len(peaks[:3])
     npeaks=len(peaks)
