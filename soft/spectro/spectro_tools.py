@@ -34,6 +34,30 @@ def plot_spectrum_panels(xaxis,data,num_panels=2):
 
 
 def read_raw_spectrum(fits_file,get_header=0):
+#    print("yoyoyo")
+    # returns an index and the fluxes
+    # Open the FITS file
+    hdulist = fits.open(fits_file)
+    header = hdulist[0].header
+    # Assuming the spectrum data is in the first extension (HDU index 0)
+    data = hdulist[0].data[0][0]
+    xaxis= list(range(len(data)))
+    if(get_header==0):
+        return xaxis,data
+    if(get_header==1):
+        return xaxis,data,header
+
+def write_fits_spectrum(target_file,data,header=[]):
+    if(header==[]):
+        hdu=fits.hdu.hdulist.PrimaryHDU([[data]])
+    else:
+        hdu=fits.hdu.hdulist.PrimaryHDU([[data]],header)
+    hdul = fits.hdu.HDUList([hdu])
+    hdul.writeto(target_file,overwrite=True)
+    print('wrote ',target_file)
+        
+        
+def read_raw_spectrum_old(fits_file,get_header=0):
     # returns an index and the fluxes
     # Open the FITS file
     hdulist = fits.open(fits_file)
@@ -46,7 +70,7 @@ def read_raw_spectrum(fits_file,get_header=0):
     if(get_header==1):
         return xaxis,data,header
 
-def write_fits_spectrum(target_file,data,header=[]):
+def write_fits_spectrum_old(target_file,data,header=[]):
     if(header==[]):
         hdu=fits.hdu.hdulist.PrimaryHDU([data])
     else:
@@ -81,13 +105,25 @@ def gaussian(x, *params):
     return result
 
 # Define the Gaussian function
-def gaussian_plus_bg(x, *params):
+def _gaussian_plus_bg(x, *params):
     # just like the gaussian but with a constant background under ti
     # should help fitting emission lines in objects
+    # this is bad because there are multiple backgrounds => degenerate
     result= np.full(len(x),0.)
     for i in range(0, len(params), 4):
         amp, cen, wid , bg = params[i:i+4]
         result += amp * np.exp(-(x - cen) ** 2 / (2 * wid ** 2)) + bg
+    return result
+
+def gaussian_plus_bg(x, *params):
+    # just like the gaussian but with a constant background under ti
+    # should help fitting emission lines in objects
+    result= np.full(len(x),0.)
+    bg=params[0]
+    result=result+bg
+    for i in range(1, len(params), 3):
+        amp, cen, wid = params[i:i+3]
+        result += amp * np.exp(-(x - cen) ** 2 / (2 * wid ** 2))
     return result
 
 def generate_first_guess(peaks):
